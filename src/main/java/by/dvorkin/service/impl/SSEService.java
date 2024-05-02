@@ -21,10 +21,14 @@ public class SSEService implements ISSEService {
 
     @Override
     public void send(String login, String message) {
-        ServerSentEvent<String> event = ServerSentEvent
-                .builder(message)
-                .build();
-        subscriptions.get(login).next(event);
+        FluxSink<ServerSentEvent<String>> subscriber = subscriptions.get(login);
+        if (subscriber != null) {
+            ServerSentEvent<String> event = ServerSentEvent
+                    .builder(message)
+                    .build();
+            subscriber.next(event);
+        }
+
     }
 
 }

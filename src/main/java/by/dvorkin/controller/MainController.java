@@ -5,13 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import reactor.core.publisher.Flux;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class MainController {
@@ -26,10 +23,9 @@ public class MainController {
     }
 
     @GetMapping(path = "/sse/verification/result", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Async
-    public Flux<?> subscribe(HttpServletRequest request) {
+    public Flux<?> subscribe() {
         return Flux.<ServerSentEvent<String>>create(
-                fluxSink -> sseService.register(request.getSession().getId(), fluxSink));
+                fluxSink -> sseService.register("123", fluxSink));
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -38,7 +34,7 @@ public class MainController {
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(3000);
-                sseService.send("123", "Hello World");
+                sseService.send("123", "You've got a message :D");
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
